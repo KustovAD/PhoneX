@@ -25,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ru"
-      className={`dark ${manrope.variable} ${unbounded.variable} h-full antialiased`}
+      className={`${manrope.variable} ${unbounded.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background font-sans text-foreground">

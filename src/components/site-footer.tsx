@@ -6,7 +6,7 @@ export function SiteFooter() {
   const f = useTranslations("footer");
 
   return (
-    <footer className="mt-20 border-t border-border/70 bg-tide/40">
+    <footer className="mt-20 border-t border-border/70 bg-tide/60">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 md:grid-cols-4 md:px-6">
         <div>
           <p className="font-heading text-2xl">

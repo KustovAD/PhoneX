@@ -8,7 +8,7 @@ export default async function PromotionsPage({ params }: { params: Promise<{ loc
   const t = await getTranslations("promos");
   const products = await prisma.product.findMany({
     where: { isPublished: true, oldPrice: { not: null } },
-    include: { brand: true },
+    include: { brand: true, images: { orderBy: { sortOrder: "asc" } } },
     take: 12,
   });
   return (

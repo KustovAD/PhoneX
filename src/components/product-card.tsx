@@ -5,7 +5,7 @@ import { Heart, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { PhoneVisual } from "@/components/phone-visual";
+import { ProductPhoto } from "@/components/product-photo";
 import { useCart } from "@/hooks/use-cart";
 import { useFavorites } from "@/hooks/use-favorites";
 import { formatPrice } from "@/lib/format";
@@ -27,6 +27,7 @@ export type ProductCardData = {
   ratingAvg: number;
   stock: number;
   brand: { name: string; slug: string };
+  images?: { url: string }[];
 };
 
 export function ProductCard({
@@ -43,9 +44,10 @@ export function ProductCard({
   const liked = useFavorites((s) => s.ids.includes(product.id));
   const title = locale === "en" ? product.nameEn : product.nameRu;
   const color = locale === "en" ? product.colorEn : product.colorRu;
+  const photo = product.images?.[0]?.url;
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.18)] transition duration-300 hover:-translate-y-1 hover:border-primary/40">
+    <article className="group relative flex flex-col overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-4 shadow-[0_10px_40px_rgba(43,36,28,0.08)] transition duration-300 hover:-translate-y-1 hover:border-primary/40">
       <button
         type="button"
         onClick={() => toggle(product.id)}
@@ -55,9 +57,12 @@ export function ProductCard({
         <Heart className={cn("size-4", liked && "fill-beige text-beige")} />
       </button>
       <Link href={`/products/${product.slug}`} className="block">
-        <div className="relative h-56">
-          <PhoneVisual color={product.colorHex} brand={product.brand.name} model={product.model} />
-        </div>
+        <ProductPhoto
+          src={photo}
+          alt={title}
+          className="h-56 rounded-2xl"
+          sizes="(max-width: 768px) 100vw, 25vw"
+        />
         <p className="mt-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">
           {product.brand.name}
         </p>
@@ -86,6 +91,7 @@ export function ProductCard({
               brand: product.brand.name,
               price: product.price,
               colorHex: product.colorHex,
+              imageUrl: photo,
             });
             toast.success(t("addToCart"));
           }}

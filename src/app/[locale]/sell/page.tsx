@@ -152,7 +152,7 @@ export default function SellPage() {
         <h2 className="font-heading text-xl">{t("exterior")}</h2>
         {DEFECTS.map((key) => (
           <label key={key} className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name={key} className="size-4 accent-[#3a7d96]" /> {t(`defects.${key}`)}
+            <input type="checkbox" name={key} className="size-4 accent-primary" /> {t(`defects.${key}`)}
           </label>
         ))}
       </section>
@@ -161,7 +161,7 @@ export default function SellPage() {
         <h2 className="font-heading text-xl">{t("kit")}</h2>
         {KIT.map((key) => (
           <label key={key} className="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="kit" value={key} defaultChecked={key !== "case"} className="size-4 accent-[#3a7d96]" /> {tk(key)}
+            <input type="checkbox" name="kit" value={key} defaultChecked={key !== "case"} className="size-4 accent-primary" /> {tk(key)}
           </label>
         ))}
       </section>

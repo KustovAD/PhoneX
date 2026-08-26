@@ -27,6 +27,9 @@ export async function PATCH(
   }
   const { id } = await params;
   const body = await req.json();
+  const images = Array.isArray(body.images)
+    ? body.images.filter((url: unknown): url is string => typeof url === "string" && url.startsWith("/"))
+    : undefined;
   const product = await prisma.product.update({
     where: { id },
     data: {
@@ -35,7 +38,16 @@ export async function PATCH(
       isPublished: body.isPublished,
       nameRu: body.nameRu,
       nameEn: body.nameEn,
+      ...(images
+        ? {
+            images: {
+              deleteMany: {},
+              create: images.map((url: string, sortOrder: number) => ({ url, sortOrder })),
+            },
+          }
+        : {}),
     },
+    include: { images: { orderBy: { sortOrder: "asc" } } },
   });
   return jsonOk(product);
 }

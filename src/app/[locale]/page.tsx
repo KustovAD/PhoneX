@@ -3,7 +3,7 @@ import { prisma } from "@/db/prisma";
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
-import { PhoneVisual } from "@/components/phone-visual";
+import { ProductPhoto } from "@/components/product-photo";
 
 export default async function HomePage({
   params,
@@ -25,6 +25,15 @@ export default async function HomePage({
     }),
   ]);
 
+  const heroPhotos = products
+    .map((product) => ({
+      src: product.images[0]?.url,
+      alt: locale === "en" ? product.nameEn : product.nameRu,
+      slug: product.slug,
+    }))
+    .filter((item) => item.src?.startsWith("/uploads/"))
+    .slice(0, 2);
+
   return (
     <div>
       <section className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-8 pt-10 md:grid-cols-2 md:px-6 md:pt-16">
@@ -41,13 +50,28 @@ export default async function HomePage({
             </Button>
           </div>
         </div>
-        <div className="relative h-[420px] md:h-[540px]">
-          <div className="absolute left-[8%] top-8 w-[46%] rotate-[-8deg]">
-            <PhoneVisual color="#C4B7A6" brand="Apple" model="iPhone 15 Pro" className="h-[380px] md:h-[460px]" />
-          </div>
-          <div className="absolute right-[6%] top-16 w-[46%] rotate-[10deg]">
-            <PhoneVisual color="#1E3A5F" brand="Samsung" model="Galaxy S24" className="h-[380px] md:h-[460px]" />
-          </div>
+        <div className="relative min-h-[320px] md:min-h-[480px]">
+          {heroPhotos.length > 0 ? (
+            <div className="relative h-[380px] md:h-[500px]">
+              {heroPhotos.map((photo, index) => (
+                <Link
+                  key={photo.slug}
+                  href={`/products/${photo.slug}`}
+                  className={`absolute w-[58%] overflow-hidden rounded-[2rem] border border-border/70 shadow-[0_24px_60px_rgba(43,36,28,0.12)] ${
+                    index === 0 ? "left-[4%] top-4 rotate-[-6deg]" : "right-[2%] top-20 rotate-[8deg]"
+                  }`}
+                >
+                  <ProductPhoto src={photo.src} alt={photo.alt} className="h-[300px] md:h-[380px]" sizes="40vw" />
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="flex h-[380px] items-center justify-center rounded-[2.5rem] border border-beige/40 bg-card/80 md:h-[480px]">
+              <p className="font-heading text-5xl tracking-tight text-beige">
+                Phone<span className="text-primary">X</span>
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

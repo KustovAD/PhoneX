@@ -370,7 +370,11 @@
     "reviewBonus": "Review bonus",
     "referralBonus": "Referral bonus",
     "maxPayPercent": "Max pay with bonuses, %",
-    "expiryDays": "Expiry, days"
+    "expiryDays": "Expiry, days",
+    "addPhotos": "Photos",
+    "removePhoto": "Remove photo",
+    "photoHint": "Upload real phone photos — generated mockups are gone.",
+    "photoError": "Could not save photos"
   },
   "common": {
     "loading": "Loading…",

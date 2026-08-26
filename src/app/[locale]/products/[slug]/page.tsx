@@ -40,7 +40,7 @@ export default async function ProductPage({
 
   return (
     <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 md:grid-cols-2 md:px-6">
-      <ProductGallery color={product.colorHex} brand={product.brand.name} model={product.model} />
+      <ProductGallery images={product.images} alt={title} />
       <div>
         <p className="text-xs uppercase tracking-[0.22em] text-beige">{product.brand.name}</p>
         <h1 className="mt-2 font-heading text-4xl">{title}</h1>

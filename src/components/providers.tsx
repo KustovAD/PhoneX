@@ -8,10 +8,10 @@ import { Toaster } from "@/components/ui/sonner";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark">
+      <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
         <TooltipProvider delayDuration={200}>
           {children}
-          <Toaster theme="dark" />
+          <Toaster theme="light" />
         </TooltipProvider>
       </ThemeProvider>
     </SessionProvider>

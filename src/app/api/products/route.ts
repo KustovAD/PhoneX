@@ -7,7 +7,22 @@ import { prisma } from "@/db/prisma";
 import { slugify } from "@/lib/slugify";
 
 export async function GET(req: NextRequest) {
-  const parsed = productFilterSchema.safeParse(Object.fromEntries(req.nextUrl.searchParams));
+  const params = Object.fromEntries(req.nextUrl.searchParams);
+  const isAdminScope = params.scope === "admin";
+  delete params.scope;
+  if (isAdminScope) {
+    try {
+      await requireStaff();
+    } catch {
+      return jsonError("Forbidden", 403);
+    }
+    const items = await prisma.product.findMany({
+      include: { brand: true, images: { orderBy: { sortOrder: "asc" } } },
+      orderBy: { createdAt: "desc" },
+    });
+    return jsonOk({ items, total: items.length });
+  }
+  const parsed = productFilterSchema.safeParse(params);
   const data = await productService.list(parsed.success ? parsed.data : {});
   return jsonOk(data);
 }

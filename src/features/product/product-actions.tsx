@@ -19,6 +19,7 @@ export function ProductActions({
     stock: number;
     colorHex: string;
     brand: { name: string };
+    images?: { url: string }[];
   };
   title: string;
 }) {
@@ -35,6 +36,7 @@ export function ProductActions({
     brand: product.brand.name,
     price: product.price,
     colorHex: product.colorHex,
+    imageUrl: product.images?.[0]?.url,
   };
 
   return (

@@ -43,6 +43,7 @@ export type CartItem = {
   brand: string;
   price: number;
   colorHex: string;
+  imageUrl?: string | null;
   quantity: number;
 };
 

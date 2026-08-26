@@ -186,12 +186,6 @@ async function main() {
         descriptionRu: "Проверенный смартфон с диагностикой экрана, камер и аккумулятора.",
         descriptionEn: "Verified smartphone with display, camera, and battery diagnostics.",
         inspectionJson: inspection,
-        images: {
-          create: [
-            { url: `/phones/${p.sku}.svg`, sortOrder: 0 },
-            { url: `/phones/${p.sku}-2.svg`, sortOrder: 1 },
-          ],
-        },
       },
     });
     createdProducts.push(created);
@@ -256,7 +250,6 @@ async function main() {
       price: 47000,
       recommendedPrice: 48500,
       status: "pending_moderation",
-      images: { create: [{ url: "/phones/listing-1.svg", kind: "front", sortOrder: 0 }] },
     },
   });
 

@@ -5,8 +5,8 @@ import { Link } from "@/i18n/routing";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
+import { ProductPhoto } from "@/components/product-photo";
 import { formatPrice } from "@/lib/format";
-import { PhoneVisual } from "@/components/phone-visual";
 
 export default function CartPage() {
   const t = useTranslations("cart");
@@ -21,9 +21,13 @@ export default function CartPage() {
         <h1 className="font-heading text-3xl">{t("title")}</h1>
         {items.map((item) => (
           <article key={item.productId} className="flex gap-4 rounded-2xl border border-border/70 p-4">
-            <div className="h-24 w-20">
-              <PhoneVisual color={item.colorHex} brand={item.brand} className="h-full" />
-            </div>
+            <ProductPhoto
+              src={item.imageUrl}
+              alt={item.title}
+              className="h-24 w-20 shrink-0 rounded-xl"
+              sizes="80px"
+              fit="cover"
+            />
             <div className="flex-1">
               <p className="font-heading">{item.title}</p>
               <p className="text-sm text-mist">{formatPrice(item.price, "ru")}</p>

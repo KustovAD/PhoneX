@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   images: {
+    localPatterns: [{ pathname: "/uploads/**", search: "" }],
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
     ],

@@ -1,36 +1,41 @@
 "use client";
 
 import { useState } from "react";
-import { PhoneVisual } from "@/components/phone-visual";
+import { ProductPhoto } from "@/components/product-photo";
 
 export function ProductGallery({
-  color,
-  brand,
-  model,
+  images,
+  alt,
 }: {
-  color: string;
-  brand: string;
-  model: string;
+  images: { url: string }[];
+  alt: string;
 }) {
-  const [angle, setAngle] = useState<"front" | "back" | "side">("front");
+  const [index, setIndex] = useState(0);
+  const current = images[index]?.url;
 
   return (
     <div>
-      <div className="relative h-[420px] overflow-hidden rounded-[2rem] border border-border/70 bg-card/50 md:h-[560px]">
-        <PhoneVisual color={color} brand={brand} model={model} angle={angle} className="h-full" />
-      </div>
-      <div className="mt-3 grid grid-cols-3 gap-3">
-        {(["front", "back", "side"] as const).map((item) => (
-          <button
-            key={item}
-            type="button"
-            onClick={() => setAngle(item)}
-            className={`h-24 overflow-hidden rounded-2xl border ${angle === item ? "border-primary" : "border-border/70"} bg-card/60`}
-          >
-            <PhoneVisual color={color} brand={brand} model={model} angle={item} className="h-full scale-125" />
-          </button>
-        ))}
-      </div>
+      <ProductPhoto
+        src={current}
+        alt={alt}
+        className="h-[420px] rounded-[2rem] border border-border/70 md:h-[560px]"
+        sizes="(max-width: 768px) 100vw, 50vw"
+        priority
+      />
+      {images.length > 1 ? (
+        <div className="mt-3 grid grid-cols-4 gap-3">
+          {images.map((image, i) => (
+            <button
+              key={image.url + i}
+              type="button"
+              onClick={() => setIndex(i)}
+              className={`overflow-hidden rounded-2xl border ${index === i ? "border-primary" : "border-border/70"}`}
+            >
+              <ProductPhoto src={image.url} alt={alt} className="h-24" sizes="120px" fit="cover" />
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
