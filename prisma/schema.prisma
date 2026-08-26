@@ -1,0 +1,501 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+
+  @@map("roles")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  phone         String?   @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  image         String?
+  roleId        String
+  role          Role      @relation(fields: [roleId], references: [id])
+  isBlocked     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile           UserProfile?
+  accounts          Account[]
+  sessions          Session[]
+  products          Product[]           @relation("ProductSeller")
+  orders            Order[]
+  favorites         Favorite[]
+  listings          UserListing[]
+  tradeInRequests   TradeInRequest[]
+  bonusAccount      BonusAccount?
+  reviewsAuthored   Review[]            @relation("ReviewAuthor")
+  reviewsReceived   Review[]            @relation("ReviewSeller")
+  notifications     Notification[]
+  adminActions      AdminAction[]
+  referralCode      String?             @unique
+  referredById      String?
+  referredBy        User?               @relation("Referrals", fields: [referredById], references: [id])
+  referrals         User[]              @relation("Referrals")
+
+  @@index([roleId])
+  @@index([email])
+  @@index([phone])
+  @@map("users")
+}
+
+model UserProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio       String?
+  city      String?
+  avatar    String?
+  dealsCount Int     @default(0)
+  ratingAvg  Float   @default(0)
+  ratingCount Int    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  type       String   @default("email")
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  nameRu    String
+  nameEn    String
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Brand {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  name         String
+  logo         String?
+  demandScore  Float         @default(1)
+  sortOrder    Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  products     Product[]
+  listings     UserListing[]
+  models       PhoneModel[]
+
+  @@map("brands")
+}
+
+model PhoneModel {
+  id           String   @id @default(cuid())
+  brandId      String
+  brand        Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  name         String
+  slug         String
+  year         Int
+  basePrice    Int
+  demandScore  Float    @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([brandId, slug])
+  @@index([brandId])
+  @@map("phone_models")
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  sku             String   @unique
+  brandId         String
+  brand           Brand    @relation(fields: [brandId], references: [id])
+  categoryId      String
+  category        Category @relation(fields: [categoryId], references: [id])
+  sellerId        String?
+  seller          User?    @relation("ProductSeller", fields: [sellerId], references: [id])
+  listingId       String?  @unique
+  listing         UserListing? @relation(fields: [listingId], references: [id])
+  nameRu          String
+  nameEn          String
+  model           String
+  version         String?
+  storageGb       Int
+  colorRu         String
+  colorEn         String
+  colorHex        String   @default("#1C1C1E")
+  condition       String
+  batteryHealth   Int
+  chargeCycles    Int?
+  imei            String?
+  region          String?
+  warrantyMonths  Int      @default(12)
+  kitJson         String   @default("[]")
+  price           Int
+  oldPrice        Int?
+  stock           Int      @default(1)
+  isPublished     Boolean  @default(true)
+  isFeatured      Boolean  @default(false)
+  ratingAvg       Float    @default(0)
+  ratingCount     Int      @default(0)
+  viewCount       Int      @default(0)
+  descriptionRu   String?
+  descriptionEn   String?
+  inspectionJson  String   @default("{}")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  images      ProductImage[]
+  orderItems  OrderItem[]
+  favorites   Favorite[]
+  reviews     Review[]
+
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([price])
+  @@index([isPublished, isFeatured])
+  @@index([model])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  number          String   @unique
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  status          String   @default("pending")
+  subtotal        Int
+  bonusUsed       Int      @default(0)
+  bonusDiscount   Int      @default(0)
+  total           Int
+  contactName     String
+  contactPhone    String
+  contactEmail    String
+  address         String?
+  comment         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  title     String
+  price     Int
+  quantity  Int     @default(1)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@map("favorites")
+}
+
+model UserListing {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brandId        String
+  brand          Brand    @relation(fields: [brandId], references: [id])
+  model          String
+  version        String?
+  storageGb      Int
+  color          String
+  imei           String
+  region         String?
+  purchaseDate   DateTime?
+  condition      String
+  batteryHealth  Int
+  chargeCycles   Int?
+  defectsJson    String   @default("{}")
+  kitJson        String   @default("[]")
+  price          Int
+  recommendedPrice Int?
+  status         String   @default("pending_moderation")
+  rejectReason   String?
+  moderatorNote  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  images  ListingImage[]
+  product Product?
+
+  @@index([userId])
+  @@index([status])
+  @@index([brandId])
+  @@map("user_listings")
+}
+
+model ListingImage {
+  id        String      @id @default(cuid())
+  listingId String
+  listing   UserListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url       String
+  kind      String
+  sortOrder Int         @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([listingId])
+  @@map("listing_images")
+}
+
+model TradeInRequest {
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  status        String   @default("draft")
+  contactName   String?
+  contactPhone  String?
+  contactEmail  String?
+  brandSlug     String
+  modelSlug     String
+  modelName     String
+  storageGb     Int
+  year          Int
+  adminPrice    Int?
+  adminComment  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  conditions TradeInCondition?
+  valuation  TradeInValuation?
+
+  @@index([userId])
+  @@index([status])
+  @@map("trade_in_requests")
+}
+
+model TradeInCondition {
+  id              String         @id @default(cuid())
+  requestId       String         @unique
+  request         TradeInRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  batteryHealth   Int
+  screen          String
+  body            String
+  cameras         String
+  biometrics      String
+  speakers        String
+  charging        String
+  repairsJson     String         @default("[]")
+  kitJson         String         @default("[]")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("trade_in_conditions")
+}
+
+model TradeInValuation {
+  id           String         @id @default(cuid())
+  requestId    String         @unique
+  request      TradeInRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  basePrice    Int
+  estimatedMin Int
+  estimatedMax Int
+  estimated    Int
+  breakdownJson String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("trade_in_valuations")
+}
+
+model TradeInCoefficient {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  groupName   String
+  labelRu     String
+  labelEn     String
+  multiplier  Float?
+  deduction   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([groupName])
+  @@map("trade_in_coefficients")
+}
+
+model BonusAccount {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions BonusTransaction[]
+
+  @@map("bonus_accounts")
+}
+
+model BonusTransaction {
+  id          String       @id @default(cuid())
+  accountId   String
+  account     BonusAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  amount      Int
+  type        String
+  description String
+  expiresAt   DateTime?
+  createdAt   DateTime     @default(now())
+
+  @@index([accountId])
+  @@index([createdAt])
+  @@map("bonus_transactions")
+}
+
+model BonusSettings {
+  id                 String   @id @default("default")
+  registrationBonus  Int      @default(500)
+  purchasePercent    Float    @default(3)
+  saleBonus          Int      @default(400)
+  tradeInBonus       Int      @default(300)
+  reviewBonus        Int      @default(150)
+  referralBonus      Int      @default(700)
+  maxPayPercent      Float    @default(30)
+  expiryDays         Int      @default(365)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("bonus_settings")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+  sellerId  String?
+  seller    User?    @relation("ReviewSeller", fields: [sellerId], references: [id])
+  orderId   String?
+  rating    Int
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([sellerId])
+  @@index([authorId])
+  @@map("reviews")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  titleRu   String
+  titleEn   String
+  bodyRu    String
+  bodyEn    String
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model AdminAction {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation(fields: [adminId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  payload    String?
+  createdAt  DateTime @default(now())
+
+  @@index([adminId])
+  @@index([entityType, entityId])
+  @@map("admin_actions")
+}
