@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { ProductPhoto } from "@/components/product-photo";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage({
   params,
 }: {

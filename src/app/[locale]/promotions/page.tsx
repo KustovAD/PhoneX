@@ -2,6 +2,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/db/prisma";
 import { ProductCard } from "@/components/product-card";
 
+export const dynamic = "force-dynamic";
+
 export default async function PromotionsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);

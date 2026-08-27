@@ -45,8 +45,8 @@ export class ProductService {
     }
     if (query.color) {
       where.OR = [
-        { colorRu: { contains: query.color } },
-        { colorEn: { contains: query.color } },
+        { colorRu: { contains: query.color, mode: "insensitive" } },
+        { colorEn: { contains: query.color, mode: "insensitive" } },
       ];
     }
     if (query.inStock === "1") {
@@ -57,10 +57,10 @@ export class ProductService {
     }
     if (query.q) {
       where.OR = [
-        { nameRu: { contains: query.q } },
-        { nameEn: { contains: query.q } },
-        { model: { contains: query.q } },
-        { brand: { name: { contains: query.q } } },
+        { nameRu: { contains: query.q, mode: "insensitive" } },
+        { nameEn: { contains: query.q, mode: "insensitive" } },
+        { model: { contains: query.q, mode: "insensitive" } },
+        { brand: { name: { contains: query.q, mode: "insensitive" } } },
       ];
     }
     if (query.battery) {
@@ -133,10 +133,10 @@ export class ProductService {
       where: {
         isPublished: true,
         OR: [
-          { nameRu: { contains: q } },
-          { nameEn: { contains: q } },
-          { model: { contains: q } },
-          { brand: { name: { contains: q } } },
+          { nameRu: { contains: q, mode: "insensitive" } },
+          { nameEn: { contains: q, mode: "insensitive" } },
+          { model: { contains: q, mode: "insensitive" } },
+          { brand: { name: { contains: q, mode: "insensitive" } } },
         ],
       },
       include: { brand: true },

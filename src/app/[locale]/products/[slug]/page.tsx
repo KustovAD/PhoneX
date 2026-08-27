@@ -8,6 +8,8 @@ import { ProductGallery } from "@/features/product/product-gallery";
 import { ReviewForm } from "@/features/product/review-form";
 import { Badge } from "@/components/ui/badge";
 
+export const dynamic = "force-dynamic";
+
 const CHECKS = [
   "screen",
   "cameras",

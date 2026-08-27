@@ -25,7 +25,7 @@ export class ListingService {
     if (!brand) throw new Error("BRAND_NOT_FOUND");
 
     const model = await prisma.phoneModel.findFirst({
-      where: { brandId: brand.id, name: { contains: input.model } },
+      where: { brandId: brand.id, name: { contains: input.model, mode: "insensitive" } },
     });
     const recommendedPrice = this.recommendPrice(
       model?.basePrice ?? input.price,
