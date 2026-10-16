@@ -2,13 +2,23 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-// Vercel storage integrations expose the connection string under different names
-// (Neon: DATABASE_URL, legacy Vercel Postgres: POSTGRES_PRISMA_URL / POSTGRES_URL).
-const datasourceUrl =
-  process.env.DATABASE_URL ||
-  process.env.POSTGRES_PRISMA_URL ||
-  process.env.POSTGRES_URL ||
-  undefined;
+const isPg = (v?: string): v is string => !!v && /^postgres(ql)?:\/\//.test(v);
+
+// Vercel storage integrations expose the connection string under different names,
+// sometimes with a custom prefix (e.g. STORAGE_DATABASE_URL). Mirrors scripts/migrate-if-needed.mjs.
+function resolveDatabaseUrl(): string | undefined {
+  for (const suffix of ["DATABASE_URL", "POSTGRES_PRISMA_URL", "POSTGRES_URL", "URL"]) {
+    if (isPg(process.env[suffix])) return process.env[suffix];
+    const key = Object.keys(process.env).find((k) => k.endsWith(`_${suffix}`) && isPg(process.env[k]));
+    if (key) return process.env[key];
+  }
+  const key = Object.keys(process.env).find(
+    (k) => isPg(process.env[k]) && !/UNPOOLED|NON_POOLING/.test(k),
+  );
+  return key ? process.env[key] : undefined;
+}
+
+const datasourceUrl = resolveDatabaseUrl();
 
 export const prisma =
   globalForPrisma.prisma ??

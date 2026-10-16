@@ -5,23 +5,45 @@ import { spawnSync } from "node:child_process";
 
 const onVercel = Boolean(process.env.VERCEL);
 
-const dbUrl =
-  process.env.DATABASE_URL ||
-  process.env.POSTGRES_PRISMA_URL ||
-  process.env.POSTGRES_URL ||
-  "";
+const isPg = (v) => typeof v === "string" && /^postgres(ql)?:\/\//.test(v);
+
+// Vercel storage integrations may add a custom prefix (e.g. STORAGE_DATABASE_URL),
+// so match by suffix and fall back to any variable that holds a Postgres URL.
+function findUrl(suffixes) {
+  for (const suffix of suffixes) {
+    if (isPg(process.env[suffix])) return [suffix, process.env[suffix]];
+    const key = Object.keys(process.env).find((k) => k.endsWith(`_${suffix}`) && isPg(process.env[k]));
+    if (key) return [key, process.env[key]];
+  }
+  return [null, ""];
+}
+
+let [dbKey, dbUrl] = findUrl(["DATABASE_URL", "POSTGRES_PRISMA_URL", "POSTGRES_URL", "URL"]);
+if (!dbUrl) {
+  const key = Object.keys(process.env).find(
+    (k) => isPg(process.env[k]) && !/UNPOOLED|NON_POOLING/.test(k),
+  );
+  if (key) [dbKey, dbUrl] = [key, process.env[key]];
+}
 
 // Migrations need a direct (non-pooled) connection when one is available.
-const directUrl =
-  process.env.DIRECT_URL ||
-  process.env.DATABASE_URL_UNPOOLED ||
-  process.env.POSTGRES_URL_NON_POOLING ||
-  dbUrl;
+const [directKey, directFound] = findUrl([
+  "DIRECT_URL",
+  "DATABASE_URL_UNPOOLED",
+  "POSTGRES_URL_NON_POOLING",
+]);
+const directUrl = directFound || dbUrl;
+
+if (dbUrl) {
+  console.log(`Using database from ${dbKey}${directFound ? ` (migrations via ${directKey})` : ""}.`);
+}
 
 const problems = [];
-if (!dbUrl.startsWith("postgres")) {
+if (!dbUrl) {
+  const related = Object.keys(process.env).filter((k) => /DATABASE|POSTGRES|NEON|^PG/.test(k));
   problems.push(
-    "DATABASE_URL is missing or is not a PostgreSQL URL. In Vercel open Storage → Create Database → Neon and connect it to this project.",
+    "No PostgreSQL connection string found (DATABASE_URL). In Vercel open Storage → Create Database → Neon and connect it to this project for the Production and Preview environments." +
+      (related.length ? ` Related variables seen: ${related.join(", ")}.` : " No database variables are set for this environment."),
   );
 }
 if (!process.env.AUTH_SECRET && !process.env.NEXTAUTH_SECRET) {
