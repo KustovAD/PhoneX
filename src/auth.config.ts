@@ -2,6 +2,8 @@ import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
   trustHost: true,
+  // Vercel: accept either AUTH_SECRET (Auth.js v5) or the legacy NEXTAUTH_SECRET.
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",

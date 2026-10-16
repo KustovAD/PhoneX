@@ -33,7 +33,7 @@ export default async function HomePage({
       alt: locale === "en" ? product.nameEn : product.nameRu,
       slug: product.slug,
     }))
-    .filter((item) => item.src?.startsWith("/uploads/"))
+    .filter((item) => item.src?.startsWith("/uploads/") || item.src?.includes(".public.blob.vercel-storage.com/"))
     .slice(0, 2);
 
   return (
